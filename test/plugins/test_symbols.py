@@ -8,7 +8,8 @@ import pytest
 
 from pylsp import uris
 from pylsp.lsp import SymbolKind
-from pylsp.plugins.symbols import pylsp_document_symbols
+from pylsp.plugins.document_symbols import pylsp_document_symbols
+from pylsp.plugins.workspace_symbol import pylsp_workspace_symbol
 from pylsp.workspace import Document
 
 PY2 = sys.version[0] == "2"

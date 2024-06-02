@@ -69,6 +69,11 @@ def pylsp_execute_command(config, workspace, command, arguments):
 
 
 @hookspec
+def pylsp_workspace_symbol(config, workspace, document, query):
+    pass
+
+
+@hookspec
 def pylsp_experimental_capabilities(config, workspace):
     pass
 
