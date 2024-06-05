@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 @hookimpl
-def pylsp_workspace_symbol(config, workspace, document, query):
+def pylsp_workspace_symbol(config, workspace, query):
     if not query or not workspace:
         return []
 
