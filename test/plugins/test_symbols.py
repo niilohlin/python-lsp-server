@@ -51,7 +51,7 @@ def helper_check_symbols_all_scope(symbols):
 
 def test_symbols(config, workspace):
     doc = Document(DOC_URI, workspace, DOC)
-    config.update({"plugins": {"jedi_symbols": {"all_scopes": False}}})
+    config.update({"plugins": {"jedi_document_symbols": {"all_scopes": False}}})
     symbols = pylsp_document_symbols(config, doc)
 
     # All four symbols (import sys, a, B, main)
