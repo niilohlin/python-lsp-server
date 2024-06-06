@@ -2,7 +2,6 @@
 # Copyright 2021- Python Language Server Contributors.
 
 import logging
-from pathlib import Path
 
 from pylsp import hookimpl
 from pylsp.lsp import SymbolKind
@@ -11,11 +10,14 @@ log = logging.getLogger(__name__)
 
 
 @hookimpl
-def pylsp_workspace_symbol(config, workspace, query):
+def pylsp_workspace_symbol(workspace, query):
     if not query or not workspace:
         return []
 
-    return [_jedi_name_to_symbol(jedi_name) for jedi_name in workspace.search(query)]
+    return [
+        _jedi_name_to_symbol(jedi_name)
+        for jedi_name in workspace.complete_search(query)
+    ]
 
 
 def _jedi_name_to_symbol(jedi_name):
@@ -33,18 +35,8 @@ def _jedi_name_to_symbol(jedi_name):
 
 
 def _jedi_type_to_symbol_kind(jedi_type):
-    if jedi_type == "module":
-        return SymbolKind.Module
-    if jedi_type == "class":
-        return SymbolKind.Class
-    if jedi_type == "function":
-        return SymbolKind.Function
-    if jedi_type == "instance":
-        return SymbolKind.Variable
-    if jedi_type == "statement":
-        return SymbolKind.Variable
-    if jedi_type == "param":
-        return SymbolKind.Variable
-    if jedi_type == "path":
-        return SymbolKind.File
-    return SymbolKind.Variable
+    return {
+        "module": SymbolKind.Module,
+        "class": SymbolKind.Class,
+        "function": SymbolKind.Function,
+    }.get(jedi_type, SymbolKind.Variable)

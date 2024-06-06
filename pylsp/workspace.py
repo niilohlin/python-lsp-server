@@ -100,7 +100,7 @@ class Workspace:
     def root_uri(self):
         return self._root_uri
 
-    def search(self, query):
+    def complete_search(self, query):
         project = self.jedi_project()
         return project.complete_search(query)
 

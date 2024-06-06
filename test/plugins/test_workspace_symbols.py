@@ -7,70 +7,49 @@ import sys
 import pytest
 
 from pylsp import uris
-from pylsp.lsp import SymbolKind
 from pylsp.plugins.workspace_symbol import pylsp_workspace_symbol
-from pylsp.workspace import Workspace
 
 PY2 = sys.version[0] == "2"
 LINUX = sys.platform.startswith("linux")
 CI = os.environ.get("CI")
 DOC_URI = uris.from_fs_path(__file__)
-DOC = """import sys
 
-a = 'hello'
 
-class B:
-    def __init__(self):
-        x = 2
-        self.y = x
+DOC1_NAME = "file1.py"
+DOC2_NAME = "file2.py"
 
-def main(x):
-    y = 2 * x
-    return y
+DOC1 = """class Test1():
+    pass
+"""
 
+DOC2 = """from file1 import Test1
+
+try:
+    Test1()
+except UnicodeError:
+    pass
 """
 
 
-def test_symbols_empty_query(config, workspace):
-    config.update({"plugins": {"jedi_workspace_symbols": {"enabled": True}}})
-    symbols = pylsp_workspace_symbol(config, workspace, "")
+@pytest.fixture
+def tmp_workspace(temp_workspace_factory):
+    return temp_workspace_factory(
+        {
+            DOC1_NAME: DOC1,
+            DOC2_NAME: DOC2,
+        }
+    )
+
+
+def test_symbols_empty_query(tmp_workspace):
+    symbols = pylsp_workspace_symbol(tmp_workspace, "")
 
     assert len(symbols) == 0
 
 
-def test_symbols_nonempty_query(config, workspace):
-    config.update({"plugins": {"jedi_workspace_symbols": {"enabled": True}}})
-    symbols = pylsp_workspace_symbol(config, workspace, "main")
+def test_symbols_nonempty_query(tmp_workspace):
+    symbols = pylsp_workspace_symbol(tmp_workspace, "Test")
 
-    assert len(symbols) == 0
-
-
-#
-# def test_symbols_all_scopes(config, workspace):
-#     doc = Document(DOC_URI, workspace, DOC)
-#     symbols = pylsp_document_symbols(config, doc)
-#     helper_check_symbols_all_scope(symbols)
-#
-#
-# def test_symbols_non_existing_file(config, workspace, tmpdir):
-#     path = tmpdir.join("foo.py")
-#     # Check pre-condition: file must not exist
-#     assert not path.check(exists=1)
-#
-#     doc = Document(uris.from_fs_path(str(path)), workspace, DOC)
-#     symbols = pylsp_document_symbols(config, doc)
-#     helper_check_symbols_all_scope(symbols)
-#
-#
-# @pytest.mark.skipif(
-#     PY2 or not LINUX or not CI, reason="tested on linux and python 3 only"
-# )
-# def test_symbols_all_scopes_with_jedi_environment(workspace):
-#     doc = Document(DOC_URI, workspace, DOC)
-#
-#     # Update config extra environment
-#     env_path = "/tmp/pyenv/bin/python"
-#     settings = {"pylsp": {"plugins": {"jedi": {"environment": env_path}}}}
-#     doc.update_config(settings)
-#     symbols = pylsp_document_symbols(doc._config, doc)
-#     helper_check_symbols_all_scope(symbols)
+    assert len(symbols) == 1
+    assert symbols[0]["name"] == "Test1"
+    assert symbols[0]["kind"] == 5  # Class
